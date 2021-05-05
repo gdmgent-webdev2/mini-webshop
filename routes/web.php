@@ -20,7 +20,18 @@ Route::middleware(['auth', 'verified'])->group(function() {
         return redirect()->route('shop');
     });
 
-    Route::get('/shop/{slug?}', [ShopController::class, 'index'])->name('shop');
+    Route::prefix('/shop')
+        ->name('shop')
+        ->group(function() {
+            Route::get('/{slug?}', [ShopController::class, 'index']);
+            Route::post('/cart', [ShopController::class, 'addToCart'])->name('.cart');
+
+            Route::get('/orders/{order}', [ShopController::class, 'getOrder'])->name('.order');
+            Route::post('/orders', [ShopController::class, 'order'])->name('.order.create');
+        });
 });
+
+// VerifyCsrfToken!!!!!!
+Route::post('/webhooks/mollie', [ShopController::class, 'webhook'])->name('webhooks.mollie');
 
 require __DIR__.'/auth.php';
